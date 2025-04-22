@@ -1,0 +1,11 @@
+usage: gflownet.py [-h] [--device DEVICE] [--progress] [--seed SEED] [--wdb]
+                   [--method METHOD] [--learning_rate LEARNING_RATE]
+                   [--tb_lr TB_LR] [--tb_z_lr TB_Z_LR] [--mbsize MBSIZE]
+                   [--n_hid N_HID] [--n_layers N_LAYERS]
+                   [--n_train_steps N_TRAIN_STEPS] [--exp_weight EXP_WEIGHT]
+                   [--temp TEMP] [--rand_pb RAND_PB] [--fl FL]
+                   [--size {small,medium,large}] [--action_dim ACTION_DIM]
+                   [--set_size SET_SIZE] [--bufsize BUFSIZE] [--alpha ALPHA]
+                   [--mode_threshold MODE_THRESHOLD]
+                   [--num_threads NUM_THREADS]
+gflownet.py: error: unrecognized arguments: --num_threds 4

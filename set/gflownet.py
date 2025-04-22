@@ -26,17 +26,23 @@ import time
 from itertools import chain
 from itertools import combinations
 
+import sys
+sys.stdout.reconfigure(line_buffering=True)
+
+print("Loading args...",flush=True)
 parser = argparse.ArgumentParser()
 
 parser.add_argument("--device", default='cuda', type=str)
-parser.add_argument("--progress", action='store_true')
+parser.add_argument("--progress", action='store_true',default=True)
 parser.add_argument("--seed", default=0, type=int)
-parser.add_argument("--wdb", action='store_true')
+# parser.add_argument("--wdb", action='store_true',default=True)
+parser.add_argument("--wdb", action='store_true',default=True)
+
 parser.add_argument("--method", default='db_gfn', type=str)
 parser.add_argument("--learning_rate", default=1e-4, help="Learning rate", type=float)
 parser.add_argument("--tb_lr", default=0.001, help="Learning rate", type=float)
 parser.add_argument("--tb_z_lr", default=0.1, help="Learning rate", type=float)
-parser.add_argument("--mbsize", default=16, help="Minibatch size", type=int)
+parser.add_argument("--mbsize", default=16, help="Minibatch size", type=int) # batch size
 parser.add_argument("--n_hid", default=256, type=int)
 parser.add_argument("--n_layers", default=2, type=int)
 parser.add_argument("--n_train_steps", default=10000, type=int)
@@ -50,17 +56,103 @@ parser.add_argument("--action_dim", default=10, type=int)
 parser.add_argument("--set_size", default=5, type=int)
 parser.add_argument("--bufsize", default=16, type=int)
 
+# Biased GFlowNets
+parser.add_argument("--alpha", default=0.5,help="Convex Combination Bias", type=float)
+parser.add_argument("--mode_threshold", default=0.25,type=float) # manually set the reward threshold at present
+parser.add_argument("--num_threads",default=8,type=int)
+
+print("Initialized args, start initializing models",flush=True)
+
 _dev = [torch.device('cuda')]
-tf = lambda x: torch.FloatTensor(x).to(_dev[0])
-tl = lambda x: torch.LongTensor(x).to(_dev[0])
+# tf = lambda x: torch.FloatTensor(x).to(_dev[0])
+# tl = lambda x: torch.LongTensor(x).to(_dev[0])
 
 def set_device(dev):
     _dev[0] = dev
+
+
+def tf(data, device=_dev[0]):
+    """
+    Converts various types of input data to a torch.FloatTensor efficiently.
+
+    Args:
+        data: The input data. Can be a numpy ndarray, list of ndarrays, list of lists, or list of scalars.
+        device: The device to move the tensor to (e.g., 'cuda' or 'cpu').
+
+    Returns:
+        torch.FloatTensor or list of torch.FloatTensor (if shapes differ).
+    """
+    # Case 1: Single NumPy ndarray
+    if isinstance(data, np.ndarray):
+        tensor = torch.from_numpy(data).float()
+
+    # Case 2: List of NumPy arrays
+    elif isinstance(data, list) and all(isinstance(d, np.ndarray) for d in data):
+        try:
+            stacked = np.stack(data)  # works if all shapes match
+            tensor = torch.from_numpy(stacked).float()
+        except ValueError:
+            # Fallback for irregular shapes
+            return [torch.from_numpy(d).float().to(device) if device else torch.from_numpy(d).float()
+                    for d in data]
+
+    # Case 3: List of lists (assumed rectangular)
+    elif isinstance(data, list) and all(isinstance(d, list) for d in data):
+        tensor = torch.FloatTensor(data)
+
+    # Case 4: List of scalars
+    elif isinstance(data, list) and all(np.isscalar(d) for d in data):
+        tensor = torch.FloatTensor(data)
+
+    # Fallback for other types
+    else:
+        tensor = torch.FloatTensor(data)
+
+    return tensor.to(device) if device else tensor
+
+def tl(data, device=_dev[0]):
+    """
+    Converts input data to torch.LongTensor efficiently.
+
+    Args:
+        data: Input data (can be numpy array, list of ndarrays, list of lists, or list of scalars).
+        device: Device to move the tensor to (e.g., 'cuda' or 'cpu').
+
+    Returns:
+        torch.LongTensor or list of torch.LongTensor (if shapes differ).
+    """
+    # Case 1: Single NumPy ndarray
+    if isinstance(data, np.ndarray):
+        tensor = torch.from_numpy(data).long()
+
+    # Case 2: List of NumPy arrays (same or different shapes)
+    elif isinstance(data, list) and all(isinstance(d, np.ndarray) for d in data):
+        try:
+            stacked = np.stack(data)  # assumes same shape
+            tensor = torch.from_numpy(stacked).long()
+        except ValueError:
+            return [torch.from_numpy(d).long().to(device) if device else torch.from_numpy(d).long()
+                    for d in data]
+
+    # Case 3: List of lists (assumed rectangular)
+    elif isinstance(data, list) and all(isinstance(d, list) for d in data):
+        tensor = torch.LongTensor(data)
+
+    # Case 4: List of scalars
+    elif isinstance(data, list) and all(np.isscalar(d) for d in data):
+        tensor = torch.LongTensor(data)
+
+    # Fallback for other types
+    else:
+        tensor = torch.tensor(data, dtype=torch.long)
+
+    return tensor.to(device) if device else tensor
 
 class SetEnv:
     def __init__(self, action_dim, set_size, intermediate_energies):
         self.action_dim = action_dim
         self.set_size = set_size
+        # 为什么无论是fl还是非fl都会有intermediate reward啊？
         self.intermediate_energies = np.array(intermediate_energies)
         self.intermediate_rewards = np.exp(-self.intermediate_energies)
 
@@ -76,7 +168,7 @@ class SetEnv:
         self._step = 0
         return self.obs()
 
-    def step(self, a):
+    def step(self, a):# 为什么都有intermediate reward啊？？？
         self._state[a] = 1
         self._step += 1
 
@@ -93,7 +185,7 @@ class TBFlowNetAgent:
         out_dim = (args.action_dim) + (args.action_dim) + (1)
         self.model = make_mlp([args.action_dim] + [args.n_hid] * args.n_layers + [out_dim])
         self.model.to(args.dev)
-        print (self.model)
+        print(self.model,flush=True)
 
         self.Z = torch.zeros((1,)).to(args.dev)
         self.Z.requires_grad_()
@@ -108,6 +200,9 @@ class TBFlowNetAgent:
 
         self.all_unique_Rs = [] 
         self.visited_strs = []
+
+        # Biased GFlowNets
+        self.alpha=torch.tensor(args.alpha,device=args.dev, requires_grad=False)
 
     def parameters(self):
         return self.model.parameters()
@@ -126,13 +221,13 @@ class TBFlowNetAgent:
 
         while not all(done):
             with torch.no_grad():
-                pred = self.model(s)
+                pred = self.model(s) # predict in parallel
                 edge_mask = s.float()
                 logits = (pred[..., : self.action_dim] - inf * edge_mask).log_softmax(1)
                 if evaluate:
                     sample_ins_probs = (logits / self.temp).softmax(1)
                 else:
-                    sample_ins_probs = (1 - self.exp_weight) * (logits / self.temp).softmax(1) + self.exp_weight * (1 - edge_mask) / (1 - edge_mask + 0.0000001).sum(1).unsqueeze(1)
+                    sample_ins_probs = (1 - self.exp_weight) * (logits / self.temp).softmax(1) + self.exp_weight * (1 - edge_mask) / (1 - edge_mask + 0.0000001).sum(1).unsqueeze(1) # epsilon-greedy sampling in training
                 acts = sample_ins_probs.multinomial(1)
                 acts = acts.squeeze(-1)
 
@@ -182,6 +277,8 @@ class TBFlowNetAgent:
         return [batch_s, batch_a, batch_steps, batch_ri]
 
     def learn_from(self, it, batch):
+        # collect training information sample-by-sample
+
         inf = 1000000000
 
         states, actions, episode_lens, intermediate_rewards = batch
@@ -208,14 +305,14 @@ class TBFlowNetAgent:
             sum_logits = torch.sum(logits)
             sum_back_logits = torch.sum(back_logits)
 
-            curr_return = torch.prod(curr_intermediate_rewards)
+            curr_return = torch.prod(curr_intermediate_rewards) # by summing over intermediate rewards, the collection of sample reward is simplified
 
-            curr_ll_diff = self.Z + sum_logits - curr_return.log() - sum_back_logits
+            curr_ll_diff = self.Z + sum_logits - curr_return.log() - sum_back_logits + curr_episode_len*torch.log(self.alpha/(1-self.alpha)) # Bias GFlowNets by alpha
             ll_diff.append(curr_ll_diff ** 2)
 
         ll_diff = torch.cat(ll_diff)
 
-        loss = ll_diff.sum() / len(states)
+        loss = ll_diff.sum() / len(states) # average loss over the number of samples
 
         return [loss]
 
@@ -224,7 +321,7 @@ class DBFlowNetAgent:
         out_dim = (args.action_dim) + (args.action_dim) + (1)
         self.model = make_mlp([args.action_dim] + [args.n_hid] * args.n_layers + [out_dim])
         self.model.to(args.dev)
-        print (self.model)
+        print (self.model,flush=True)
 
         self.action_dim = args.action_dim
 
@@ -237,16 +334,19 @@ class DBFlowNetAgent:
         self.all_unique_Rs = [] 
         self.visited_strs = []
 
+        # Biased GFlowNets
+        self.alpha=torch.tensor(args.alpha,device=args.dev, requires_grad=False)
+
     def parameters(self):
         return self.model.parameters()
 
     def sample_many(self, mbsize, evaluate=False):
         inf = 1000000000
 
-        batch_s, batch_a = [[] for i in range(mbsize)], [[] for i in range(mbsize)]
+        batch_s, batch_a = [[] for i in range(mbsize)], [[] for i in range(mbsize)] # online sampling of mbsize trajectories
         batch_ri = [[] for i in range(mbsize)] 
         env_idx_done_map = {i: False for i in range(mbsize)}
-        not_done_envs = [i for i in range(mbsize)]
+        not_done_envs = [i for i in range(mbsize)] # envs不是有bufsize个吗
         env_idx_return_map = {}
 
         s = tf([i.reset() for i in self.envs])
@@ -254,7 +354,7 @@ class DBFlowNetAgent:
 
         while not all(done):
             with torch.no_grad():
-                pred = self.model(s)
+                pred = self.model(s) # predict 
                 edge_mask = s.float()
                 logits = (pred[..., : self.action_dim] - inf * edge_mask).log_softmax(1)
                 if evaluate:
@@ -310,18 +410,24 @@ class DBFlowNetAgent:
         return [batch_s, batch_a, batch_steps, batch_ri]
 
     def learn_from(self, it, batch):
+        """
+        train the policy with the batch
+        :param it: iteration number
+        :param batch: a batch of data
+        """
         inf = 1000000000
 
         states, actions, episode_lens, intermediate_rewards = batch
 
         ll_diff = []
         for data_idx in range(len(states)):
+            # collect training information sample-by-sample
             curr_episode_len = episode_lens[data_idx]
 
             curr_states = states[data_idx][:curr_episode_len, :] 
             curr_actions = actions[data_idx][:curr_episode_len - 1, :] 
             curr_intermediate_rewards = intermediate_rewards[data_idx].squeeze(-1)
-            curr_return = torch.prod(curr_intermediate_rewards)
+            curr_return = torch.prod(curr_intermediate_rewards) # 
 
             pred = self.model(curr_states)
 
@@ -334,21 +440,23 @@ class DBFlowNetAgent:
             logits = logits[:-1, :].gather(1, curr_actions).squeeze(1) 
             back_logits = back_logits[1:, :].gather(1, curr_actions).squeeze(1) 
 
-            log_flow = pred[..., -1]
+            log_flow = pred[..., -1] # 这种写法是为什么？
             log_flow = log_flow[:-1] 
 
             curr_ll_diff = torch.zeros(curr_states.shape[0] - 1).to(self.dev)
             curr_ll_diff += log_flow
             curr_ll_diff += logits
-            curr_ll_diff[:-1] -= log_flow[1:]
+            curr_ll_diff[:-1] -= log_flow[1:] # 这里是DB用并行的方法实现
             curr_ll_diff -= back_logits
-            curr_ll_diff[-1] -= curr_return.log()
+            curr_ll_diff[-1] -= curr_return.log() # only evaluate reward at the end of the trajectory
+            # Biased GFlowNets
+            curr_ll_diff+= torch.ones_like(log_flow,device=log_flow.device, requires_grad=False) * torch.log(self.alpha/(1-self.alpha)) # Bias GFlowNets by alpha
 
             ll_diff.append(curr_ll_diff ** 2)
 
         ll_diff = torch.cat(ll_diff)
 
-        loss = ll_diff.sum() / len(ll_diff)
+        loss = ll_diff.sum() / len(ll_diff) # average DB over all the states and transitions
 
         return [loss]
 
@@ -383,7 +491,9 @@ class DBFlowNetAgent:
             curr_ll_diff += logits
             curr_ll_diff -= back_logits
             curr_ll_diff -= log_flow[1:]
-            curr_ll_diff -= curr_intermediate_rewards.log()
+            curr_ll_diff -= curr_intermediate_rewards.log() # evaluate the reward at every intermediate states
+            # Biased GFlowNets
+            curr_ll_diff += torch.ones_like(log_flow[:-1],device=log_flow.device, requires_grad=False) * torch.log(self.alpha/(1-self.alpha)) # Bias GFlowNets by alpha
 
             ll_diff.append(curr_ll_diff ** 2)
 
@@ -392,6 +502,8 @@ class DBFlowNetAgent:
         loss = ll_diff.sum() / len(ll_diff)
 
         return [loss]
+    
+# TODO: write SubTB GFN
 
 def main(args):
     torch.manual_seed(args.seed)
@@ -406,12 +518,14 @@ def main(args):
         method_name = 'fl_' + args.method
 
     if args.wdb:
-        wandb.init(project='gfn', name='{}_{}'.format(method_name, args.seed))
+        wandb.init(project='Length Biased GFlowNets, FL-GFN-codebase, Set Generation', name='method({})_size({})_mthres({})_alpha({})_seed({})'.format(method_name,args.size,args.mode_threshold,args.alpha,args.seed))
+        print("Successfully initialized wandb",flush=True)
 
     args.dev = torch.device(args.device)
     set_device(args.dev)
+    print("Successfully allocated device: ", args.dev)
 
-    # exp_weight is fine-tuned for each method by grid search
+    # exp_weight is fine-tuned for each method by grid search, which corresponds to the epsilon-greedy sampling trick
     if method_name == 'fl_db_gfn':
         args.exp_weight = 0.5
     elif method_name == 'db_gfn':
@@ -438,7 +552,9 @@ def main(args):
         if method_name == 'tb_gfn':
             args.exp_weight = 0.
 
-    envs = [SetEnv(args.action_dim, args.set_size, intermediate_energies) for i in range(args.bufsize)]
+    # Prepare the environment
+    envs = [SetEnv(args.action_dim, args.set_size, intermediate_energies) for i in range(args.bufsize)] # 这个bufsize是干什么的，为什么需要bufsize个环境
+    print("Successfully initialized the environment",flush=True)
 
     if args.method == 'tb_gfn':
         agent = TBFlowNetAgent(args, envs)
@@ -449,10 +565,14 @@ def main(args):
         opt = torch.optim.Adam([{'params': agent.parameters(), 'lr': args.tb_lr}, {'params':[agent.Z], 'lr': args.tb_z_lr} ])
     elif args.method == 'db_gfn':
         opt = torch.optim.Adam([{'params': agent.parameters(), 'lr': args.tb_lr}])
+    print("Successfully initialized the optimizer, start training",flush=True)
 
-    for i in tqdm(range(args.n_train_steps + 1), disable=not args.progress):
+    for i in tqdm(range(args.n_train_steps + 1), disable=not args.progress,file=sys.stdout):
+        # print(f"round {i}, sampling new trajectories",flush=True)
         experiences = agent.sample_many(args.mbsize)
+        # print(f"round {i}, evaluating new trajectories",flush=True)
         agent.sample_many(args.mbsize, evaluate=True)
+        # print(f"round {i}, calculating loss and back prop",flush=True)
 
         if method_name == 'fl_db_gfn':
             losses = agent.learn_from_fl(i, experiences) 
@@ -463,16 +583,28 @@ def main(args):
         opt.step()
         opt.zero_grad()
 
-        if i % 10 == 0:
+        if i % 100 == 0:
             all_unique_Rs = sorted(agent.all_unique_Rs, reverse=True)
             all_unique_Rs = np.array(all_unique_Rs)
 
             top_k_Rs = all_unique_Rs[:100]
             mean_top_k_R = sum(top_k_Rs) / len(top_k_Rs)
+            mean_R=sum(all_unique_Rs)/len(all_unique_Rs)
+            modes=(all_unique_Rs > args.mode_threshold).sum()
+            
+            print(f"round {i+1}, mean_R={mean_R}, mean_top_k_R={mean_top_k_R}, num_unique_Rs={len(all_unique_Rs)},modes under threshold({args.mode_threshold}={modes})",flush=True)
             if args.wdb:
-                wandb.log({'mean_top_k_R': mean_top_k_R})
+                # TODO: find mode settings
+                wandb.log({'mean_top_k_R': mean_top_k_R,
+                           'mean_R': mean_R,
+                           'modes': modes,})
 
 if __name__ == '__main__':
+    print("start parsing args...",flush=True)
+    # TODO: print arg configuration
     args = parser.parse_args()
-    torch.set_num_threads(1)
+    # 遍历并逐行打印每个参数
+    for arg, value in vars(args).items():
+        print(f"{arg}: {value}")
+    torch.set_num_threads(args.num_threads)
     main(args)

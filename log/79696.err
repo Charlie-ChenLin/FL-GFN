@@ -1,0 +1,8 @@
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Currently logged in as: 1969773923 (1969773923-shanghai-jiao-tong-university) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.19.9
+wandb: Run data is saved locally in /home/lchen/home/FL-GFN/set/wandb/run-20250422_202101-ycy518lp
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run method(db_gfn)_size(small)_mthres(0.25)_alpha(0.4236)_seed(1)
+wandb: ⭐️ View project at https://wandb.ai/1969773923-shanghai-jiao-tong-university/Length%20Biased%20GFlowNets%2C%20FL-GFN-codebase%2C%20Set%20Generation
+wandb: 🚀 View run at https://wandb.ai/1969773923-shanghai-jiao-tong-university/Length%20Biased%20GFlowNets%2C%20FL-GFN-codebase%2C%20Set%20Generation/runs/ycy518lp

@@ -1,0 +1,15 @@
+{"time":"2025-04-22T15:33:15.518977215+08:00","level":"INFO","msg":"stream: starting","core version":"0.19.9","symlink path":"/home/lchen/home/FL-GFN/set/wandb/run-20250422_153315-tkrd9oev/logs/debug-core.log"}
+{"time":"2025-04-22T15:33:15.995054314+08:00","level":"INFO","msg":"created new stream","id":"tkrd9oev"}
+{"time":"2025-04-22T15:33:15.995089019+08:00","level":"INFO","msg":"stream: started","id":"tkrd9oev"}
+{"time":"2025-04-22T15:33:15.995101193+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"tkrd9oev"}
+{"time":"2025-04-22T15:33:15.995133814+08:00","level":"INFO","msg":"handler: started","stream_id":"tkrd9oev"}
+{"time":"2025-04-22T15:33:15.995169902+08:00","level":"INFO","msg":"sender: started","stream_id":"tkrd9oev"}
+{"time":"2025-04-22T15:33:17.001353398+08:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-04-22T16:02:23.628022855+08:00","level":"INFO","msg":"stream: closing","id":"tkrd9oev"}
+{"time":"2025-04-22T16:02:23.628119427+08:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-04-22T16:02:23.628687216+08:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-04-22T16:02:25.131651785+08:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-04-22T16:02:25.542246841+08:00","level":"INFO","msg":"handler: closed","stream_id":"tkrd9oev"}
+{"time":"2025-04-22T16:02:25.542286635+08:00","level":"INFO","msg":"writer: Close: closed","stream_id":"tkrd9oev"}
+{"time":"2025-04-22T16:02:25.542478387+08:00","level":"INFO","msg":"sender: closed","stream_id":"tkrd9oev"}
+{"time":"2025-04-22T16:02:25.544247447+08:00","level":"INFO","msg":"stream: closed","id":"tkrd9oev"}

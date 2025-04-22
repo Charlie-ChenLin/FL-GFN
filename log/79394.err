@@ -1,0 +1,19 @@
+/bin/bash: warning: setlocale: LC_ALL: cannot change locale (zh_CN.UTF-8)
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Currently logged in as: 1969773923 (1969773923-shanghai-jiao-tong-university) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.19.9
+wandb: Run data is saved locally in /home/lchen/home/FL-GFN/set/wandb/run-20250422_133857-3hz2b50c
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run method(fl_db_gfn)_size(medium)_alpha(0.5)_seed(1)
+wandb: ⭐️ View project at https://wandb.ai/1969773923-shanghai-jiao-tong-university/Length%20Biased%20GFlowNets%2C%20FL-GFN-codebase%2C%20Set%20Generation
+wandb: 🚀 View run at https://wandb.ai/1969773923-shanghai-jiao-tong-university/Length%20Biased%20GFlowNets%2C%20FL-GFN-codebase%2C%20Set%20Generation/runs/3hz2b50c
+Traceback (most recent call last):
+  File "/home/lchen/home/FL-GFN/set/gflownet.py", line 606, in <module>
+    main(args)
+  File "/home/lchen/home/FL-GFN/set/gflownet.py", line 577, in main
+    losses = agent.learn_from_fl(i, experiences)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/lchen/home/FL-GFN/set/gflownet.py", line 495, in learn_from_fl
+    curr_ll_diff += torch.ones_like(log_flow,device=log_flow.device, requires_grad=False) * torch.log(self.alpha/(1-self.alpha)) # Bias GFlowNets by alpha
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: The size of tensor a (60) must match the size of tensor b (61) at non-singleton dimension 0

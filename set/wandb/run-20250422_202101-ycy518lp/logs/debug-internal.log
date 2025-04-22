@@ -1,0 +1,15 @@
+{"time":"2025-04-22T20:21:01.328819847+08:00","level":"INFO","msg":"stream: starting","core version":"0.19.9","symlink path":"/home/lchen/home/FL-GFN/set/wandb/run-20250422_202101-ycy518lp/logs/debug-core.log"}
+{"time":"2025-04-22T20:21:01.821924671+08:00","level":"INFO","msg":"created new stream","id":"ycy518lp"}
+{"time":"2025-04-22T20:21:01.821971851+08:00","level":"INFO","msg":"stream: started","id":"ycy518lp"}
+{"time":"2025-04-22T20:21:01.822030791+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"ycy518lp"}
+{"time":"2025-04-22T20:21:01.822074501+08:00","level":"INFO","msg":"sender: started","stream_id":"ycy518lp"}
+{"time":"2025-04-22T20:21:01.82212086+08:00","level":"INFO","msg":"handler: started","stream_id":"ycy518lp"}
+{"time":"2025-04-22T20:21:02.184757901+08:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-04-22T20:50:16.925274336+08:00","level":"INFO","msg":"stream: closing","id":"ycy518lp"}
+{"time":"2025-04-22T20:50:16.925373136+08:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-04-22T20:50:16.925566615+08:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-04-22T20:50:18.335267541+08:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-04-22T20:50:19.006402486+08:00","level":"INFO","msg":"handler: closed","stream_id":"ycy518lp"}
+{"time":"2025-04-22T20:50:19.006428166+08:00","level":"INFO","msg":"writer: Close: closed","stream_id":"ycy518lp"}
+{"time":"2025-04-22T20:50:19.006484976+08:00","level":"INFO","msg":"sender: closed","stream_id":"ycy518lp"}
+{"time":"2025-04-22T20:50:19.120502358+08:00","level":"INFO","msg":"stream: closed","id":"ycy518lp"}

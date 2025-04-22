@@ -1,0 +1,29 @@
+Loading args...
+Initialized args, start initializing models
+start parsing args...
+Successfully allocated device:  cuda
+Successfully initialized the environment
+Sequential(
+  (0): Linear(in_features=30, out_features=256, bias=True)
+  (1): LeakyReLU(negative_slope=0.01)
+  (2): Linear(in_features=256, out_features=256, bias=True)
+  (3): LeakyReLU(negative_slope=0.01)
+  (4): Linear(in_features=256, out_features=61, bias=True)
+)
+Successfully initialized the optimizer, start training
+round 1, mean_R=0.0049025307591819, mean_top_k_R=0.0049025307591819, num_unique_Rs=16
+round 11, mean_R=0.005843025243207608, mean_top_k_R=0.009408366172574461, num_unique_Rs=176
+round 21, mean_R=0.006297222622953043, mean_top_k_R=0.015765440580435098, num_unique_Rs=336
+round 31, mean_R=0.006886037785021002, mean_top_k_R=0.021829709466546773, num_unique_Rs=496
+round 41, mean_R=0.007797225345467912, mean_top_k_R=0.029542435873299838, num_unique_Rs=656
+round 51, mean_R=0.008381599159435484, mean_top_k_R=0.034782154858112334, num_unique_Rs=816
+round 61, mean_R=0.009019488997510648, mean_top_k_R=0.04088942600414157, num_unique_Rs=976
+round 71, mean_R=0.009717062029702786, mean_top_k_R=0.04773775665089488, num_unique_Rs=1136
+round 81, mean_R=0.010129435188070074, mean_top_k_R=0.05331361398100853, num_unique_Rs=1296
+round 91, mean_R=0.010306410590171684, mean_top_k_R=0.05595016537234187, num_unique_Rs=1456
+round 101, mean_R=0.010274242042826943, mean_top_k_R=0.05761214677244425, num_unique_Rs=1616
+round 111, mean_R=0.010273517704377923, mean_top_k_R=0.059559799395501614, num_unique_Rs=1776
+round 121, mean_R=0.010310444735108275, mean_top_k_R=0.061212067306041715, num_unique_Rs=1936
+round 131, mean_R=0.010413942116061134, mean_top_k_R=0.06455607425421477, num_unique_Rs=2096
+round 141, mean_R=0.010635037241756294, mean_top_k_R=0.0685542755201459, num_unique_Rs=2256
+round 151, mean_R=0.010722565267537933, mean_top_k_R=0.06926335588097572, num_unique_Rs=2416

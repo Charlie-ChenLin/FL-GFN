@@ -1,0 +1,18 @@
+Loading args...
+Initialized args, start initializing models
+start parsing args...
+Successfully initialized wandb
+Successfully allocated device:  cuda
+Successfully initialized the environment
+Sequential(
+  (0): Linear(in_features=30, out_features=256, bias=True)
+  (1): LeakyReLU(negative_slope=0.01)
+  (2): Linear(in_features=256, out_features=256, bias=True)
+  (3): LeakyReLU(negative_slope=0.01)
+  (4): Linear(in_features=256, out_features=61, bias=True)
+)
+Successfully initialized the optimizer, start training
+  0%|          | 0/10001 [00:00<?, ?it/s]  0%|          | 0/10001 [00:00<?, ?it/s]
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mmethod(fl_db_gfn)_size(small)_alpha(0.5)_seed(1)[0m at: [34mhttps://wandb.ai/1969773923-shanghai-jiao-tong-university/Length%20Biased%20GFlowNets%2C%20FL-GFN-codebase%2C%20Set%20Generation/runs/ulmgcs9g[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20250422_133803-ulmgcs9g/logs[0m

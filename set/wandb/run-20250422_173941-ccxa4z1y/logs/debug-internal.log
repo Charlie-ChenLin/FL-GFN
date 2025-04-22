@@ -1,0 +1,15 @@
+{"time":"2025-04-22T17:39:41.459416929+08:00","level":"INFO","msg":"stream: starting","core version":"0.19.9","symlink path":"/home/lchen/home/FL-GFN/set/wandb/run-20250422_173941-ccxa4z1y/logs/debug-core.log"}
+{"time":"2025-04-22T17:39:41.96127218+08:00","level":"INFO","msg":"created new stream","id":"ccxa4z1y"}
+{"time":"2025-04-22T17:39:41.96131911+08:00","level":"INFO","msg":"stream: started","id":"ccxa4z1y"}
+{"time":"2025-04-22T17:39:41.961381289+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"ccxa4z1y"}
+{"time":"2025-04-22T17:39:41.961419809+08:00","level":"INFO","msg":"handler: started","stream_id":"ccxa4z1y"}
+{"time":"2025-04-22T17:39:41.961468759+08:00","level":"INFO","msg":"sender: started","stream_id":"ccxa4z1y"}
+{"time":"2025-04-22T17:39:42.329382744+08:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-04-22T18:01:27.681703991+08:00","level":"INFO","msg":"stream: closing","id":"ccxa4z1y"}
+{"time":"2025-04-22T18:01:27.68178093+08:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-04-22T18:01:27.682515684+08:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-04-22T18:01:29.432930409+08:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-04-22T18:01:29.84267279+08:00","level":"INFO","msg":"handler: closed","stream_id":"ccxa4z1y"}
+{"time":"2025-04-22T18:01:29.84271704+08:00","level":"INFO","msg":"writer: Close: closed","stream_id":"ccxa4z1y"}
+{"time":"2025-04-22T18:01:29.842764499+08:00","level":"INFO","msg":"sender: closed","stream_id":"ccxa4z1y"}
+{"time":"2025-04-22T18:01:29.843201406+08:00","level":"INFO","msg":"stream: closed","id":"ccxa4z1y"}

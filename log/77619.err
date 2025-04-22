@@ -1,0 +1,8 @@
+/bin/bash: warning: setlocale: LC_ALL: cannot change locale (zh_CN.UTF-8)
+Traceback (most recent call last):
+  File "/home/lchen/home/FL-GFN/set/gflownet.py", line 591, in <module>
+    main(args)
+  File "/home/lchen/home/FL-GFN/set/gflownet.py", line 517, in main
+    set_device(args.dev)
+    ^^^^^^^^^^
+NameError: name 'set_device' is not defined

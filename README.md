@@ -24,6 +24,7 @@ If you used this code in your research or found it helpful, please consider citi
 - scipy: 1.5.4
 - numpy: 1.19.5
 - tdqm
+- wandb
 
 ### Molecule discovery
 Please check the [gflownet](https://github.com/GFNOrg/gflownet) repo for more details about the environment

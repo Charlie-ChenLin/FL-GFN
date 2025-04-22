@@ -1,0 +1,19 @@
+Successfully initialized wandb
+Successfully allocated device:  cuda
+Successfully initialized the environment
+Sequential(
+  (0): Linear(in_features=80, out_features=256, bias=True)
+  (1): LeakyReLU(negative_slope=0.01)
+  (2): Linear(in_features=256, out_features=256, bias=True)
+  (3): LeakyReLU(negative_slope=0.01)
+  (4): Linear(in_features=256, out_features=161, bias=True)
+)
+Successfully initialized the optimizer, start training
+  0%|          | 0/10001 [00:00<?, ?it/s]round 1, mean_R=18.49072518432513, mean_top_k_R=18.49072518432513, num_unique_Rs=16,modes under threshold(0.25=13)
+  1%|          | 100/10001 [00:14<22:55,  7.20it/s]round 101, mean_R=21.927642301340125, mean_top_k_R=274.9738528060913, num_unique_Rs=1616,modes under threshold(0.25=1260)
+  2%|▏         | 200/10001 [00:28<22:33,  7.24it/s]round 201, mean_R=31.311543599336268, mean_top_k_R=740.5788583374024, num_unique_Rs=3216,modes under threshold(0.25=2440)
+  3%|▎         | 300/10001 [00:41<22:41,  7.12it/s]round 301, mean_R=1385.9839770816284, mean_top_k_R=49215.38764648438, num_unique_Rs=4816,modes under threshold(0.25=4029)
+  4%|▍         | 400/10001 [00:56<22:19,  7.17it/s]round 401, mean_R=6560.435720475754, mean_top_k_R=183941.080078125, num_unique_Rs=6416,modes under threshold(0.25=5629)
+  5%|▍         | 500/10001 [01:10<22:11,  7.14it/s]round 501, mean_R=16401.247300281168, mean_top_k_R=301810.82765625, num_unique_Rs=8016,modes under threshold(0.25=7229)
+  6%|▌         | 600/10001 [01:24<22:02,  7.11it/s]round 601, mean_R=26432.4425385058, mean_top_k_R=354133.9490625, num_unique_Rs=9616,modes under threshold(0.25=8829)
+  6%|▋         | 650/10001 [01:31<22:02,  7.07it/s]
