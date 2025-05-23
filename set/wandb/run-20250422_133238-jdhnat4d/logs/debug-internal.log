@@ -1,7 +1,0 @@
-{"time":"2025-04-22T13:32:38.660443068+08:00","level":"INFO","msg":"stream: starting","core version":"0.19.9","symlink path":"/home/lchen/home/FL-GFN/set/wandb/run-20250422_133238-jdhnat4d/logs/debug-core.log"}
-{"time":"2025-04-22T13:32:39.146663849+08:00","level":"INFO","msg":"created new stream","id":"jdhnat4d"}
-{"time":"2025-04-22T13:32:39.146713569+08:00","level":"INFO","msg":"stream: started","id":"jdhnat4d"}
-{"time":"2025-04-22T13:32:39.146779498+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"jdhnat4d"}
-{"time":"2025-04-22T13:32:39.146810228+08:00","level":"INFO","msg":"handler: started","stream_id":"jdhnat4d"}
-{"time":"2025-04-22T13:32:39.146847938+08:00","level":"INFO","msg":"sender: started","stream_id":"jdhnat4d"}
-{"time":"2025-04-22T13:32:39.442347867+08:00","level":"INFO","msg":"Starting system monitor"}

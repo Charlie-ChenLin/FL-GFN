@@ -1,7 +1,0 @@
-{"time":"2025-04-22T19:43:16.470203623+08:00","level":"INFO","msg":"stream: starting","core version":"0.19.9","symlink path":"/home/lchen/home/FL-GFN/set/wandb/run-20250422_194316-gc2ditor/logs/debug-core.log"}
-{"time":"2025-04-22T19:43:16.950861203+08:00","level":"INFO","msg":"created new stream","id":"gc2ditor"}
-{"time":"2025-04-22T19:43:16.950931462+08:00","level":"INFO","msg":"stream: started","id":"gc2ditor"}
-{"time":"2025-04-22T19:43:16.950966602+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"gc2ditor"}
-{"time":"2025-04-22T19:43:16.951028102+08:00","level":"INFO","msg":"sender: started","stream_id":"gc2ditor"}
-{"time":"2025-04-22T19:43:16.951092122+08:00","level":"INFO","msg":"handler: started","stream_id":"gc2ditor"}
-{"time":"2025-04-22T19:43:17.308438799+08:00","level":"INFO","msg":"Starting system monitor"}
