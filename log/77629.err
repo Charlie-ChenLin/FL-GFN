@@ -1,2 +1,0 @@
-/bin/bash: warning: setlocale: LC_ALL: cannot change locale (zh_CN.UTF-8)
-slurmstepd: error: *** JOB 77629 ON node11 CANCELLED AT 2025-04-21T20:34:27 ***

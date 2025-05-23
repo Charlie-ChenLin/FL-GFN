@@ -1,3 +1,0 @@
-/home/lchen/home/FL-GFN/set/gflownet.py:57: UserWarning: Creating a tensor from a list of numpy.ndarrays is extremely slow. Please consider converting the list to a single numpy.ndarray with numpy.array() before converting to a tensor. (Triggered internally at /pytorch/torch/csrc/utils/tensor_new.cpp:254.)
-  tf = lambda x: torch.FloatTensor(x).to(_dev[0])
-slurmstepd: error: *** JOB 77610 ON node3 CANCELLED AT 2025-04-21T19:51:42 ***

@@ -1,4 +1,0 @@
-Traceback (most recent call last):
-  File "gflownet.py", line 19, in <module>
-    import wandb
-ModuleNotFoundError: No module named 'wandb'
