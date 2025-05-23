@@ -57,8 +57,8 @@ parser.add_argument("--set_size", default=5, type=int)
 parser.add_argument("--bufsize", default=16, type=int)
 
 # Alpha GFlowNets 
-parser.add_argument("--alpha", default=0.5,help="Convex Combination Bias", type=float)
-parser.add_argument("--mode_threshold", default=0.25,type=float) # manually set the reward threshold
+parser.add_argument("--alpha", default=0.5,help="alpha-GFN forward policy weight", type=float)
+parser.add_argument("--mode_threshold", default=0.25,type=float) # manually set the reward threshold, 0.25 for small, 700000 for medium and large
 parser.add_argument("--num_threads",default=8,type=int)
 
 print("Initialized args, start initializing models",flush=True)
@@ -152,7 +152,6 @@ class SetEnv:
     def __init__(self, action_dim, set_size, intermediate_energies):
         self.action_dim = action_dim
         self.set_size = set_size
-        # 为什么无论是fl还是非fl都会有intermediate reward啊？
         self.intermediate_energies = np.array(intermediate_energies)
         self.intermediate_rewards = np.exp(-self.intermediate_energies)
 
@@ -168,7 +167,7 @@ class SetEnv:
         self._step = 0
         return self.obs()
 
-    def step(self, a):# 为什么都有intermediate reward啊？？？
+    def step(self, a):
         self._state[a] = 1
         self._step += 1
 
@@ -201,8 +200,7 @@ class TBFlowNetAgent:
         self.all_unique_Rs = [] 
         self.visited_strs = []
 
-        # Biased GFlowNets
-        self.alpha=torch.tensor(args.alpha,device=args.dev, requires_grad=False)
+        self.alpha=torch.tensor(args.alpha,device=args.dev, requires_grad=False) # alpha-GFN
 
     def parameters(self):
         return self.model.parameters()
@@ -221,13 +219,13 @@ class TBFlowNetAgent:
 
         while not all(done):
             with torch.no_grad():
-                pred = self.model(s) # predict in parallel
+                pred = self.model(s)
                 edge_mask = s.float()
                 logits = (pred[..., : self.action_dim] - inf * edge_mask).log_softmax(1)
                 if evaluate:
                     sample_ins_probs = (logits / self.temp).softmax(1)
                 else:
-                    sample_ins_probs = (1 - self.exp_weight) * (logits / self.temp).softmax(1) + self.exp_weight * (1 - edge_mask) / (1 - edge_mask + 0.0000001).sum(1).unsqueeze(1) # epsilon-greedy sampling in training
+                    sample_ins_probs = (1 - self.exp_weight) * (logits / self.temp).softmax(1) + self.exp_weight * (1 - edge_mask) / (1 - edge_mask + 0.0000001).sum(1).unsqueeze(1)
                 acts = sample_ins_probs.multinomial(1)
                 acts = acts.squeeze(-1)
 
@@ -277,8 +275,6 @@ class TBFlowNetAgent:
         return [batch_s, batch_a, batch_steps, batch_ri]
 
     def learn_from(self, it, batch):
-        # collect training information sample-by-sample
-
         inf = 1000000000
 
         states, actions, episode_lens, intermediate_rewards = batch
@@ -305,14 +301,14 @@ class TBFlowNetAgent:
             sum_logits = torch.sum(logits)
             sum_back_logits = torch.sum(back_logits)
 
-            curr_return = torch.prod(curr_intermediate_rewards) # by summing over intermediate rewards, the collection of sample reward is simplified
+            curr_return = torch.prod(curr_intermediate_rewards)
 
             curr_ll_diff = self.Z + sum_logits - curr_return.log() - sum_back_logits + curr_episode_len*torch.log(self.alpha/(1-self.alpha)) # alpha-GFN
             ll_diff.append(curr_ll_diff ** 2)
 
         ll_diff = torch.cat(ll_diff)
 
-        loss = ll_diff.sum() / len(states) # average loss over the number of samples
+        loss = ll_diff.sum() / len(states)
 
         return [loss]
 
@@ -334,7 +330,7 @@ class DBFlowNetAgent:
         self.all_unique_Rs = [] 
         self.visited_strs = []
 
-        # Biased GFlowNets
+        # alpha-GFN
         self.alpha=torch.tensor(args.alpha,device=args.dev, requires_grad=False)
 
     def parameters(self):
@@ -343,7 +339,7 @@ class DBFlowNetAgent:
     def sample_many(self, mbsize, evaluate=False):
         inf = 1000000000
 
-        batch_s, batch_a = [[] for i in range(mbsize)], [[] for i in range(mbsize)] # online sampling of mbsize trajectories
+        batch_s, batch_a = [[] for i in range(mbsize)], [[] for i in range(mbsize)]
         batch_ri = [[] for i in range(mbsize)] 
         env_idx_done_map = {i: False for i in range(mbsize)}
         not_done_envs = [i for i in range(mbsize)]
@@ -489,7 +485,7 @@ class DBFlowNetAgent:
             curr_ll_diff += logits
             curr_ll_diff -= back_logits
             curr_ll_diff -= log_flow[1:]
-            curr_ll_diff -= curr_intermediate_rewards.log() # evaluate the reward at every intermediate states
+            curr_ll_diff -= curr_intermediate_rewards.log()
             curr_ll_diff += torch.ones_like(log_flow[:-1],device=log_flow.device, requires_grad=False) * torch.log(self.alpha/(1-self.alpha)) # alpha-GFN
 
             ll_diff.append(curr_ll_diff ** 2)
