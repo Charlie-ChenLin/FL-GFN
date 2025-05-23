@@ -56,9 +56,9 @@ parser.add_argument("--action_dim", default=10, type=int)
 parser.add_argument("--set_size", default=5, type=int)
 parser.add_argument("--bufsize", default=16, type=int)
 
-# Biased GFlowNets
+# Alpha GFlowNets
 parser.add_argument("--alpha", default=0.5,help="Convex Combination Bias", type=float)
-parser.add_argument("--mode_threshold", default=0.25,type=float) # manually set the reward threshold at present
+parser.add_argument("--mode_threshold", default=0.25,type=float) # manually set the reward threshold
 parser.add_argument("--num_threads",default=8,type=int)
 
 print("Initialized args, start initializing models",flush=True)
@@ -307,7 +307,7 @@ class TBFlowNetAgent:
 
             curr_return = torch.prod(curr_intermediate_rewards) # by summing over intermediate rewards, the collection of sample reward is simplified
 
-            curr_ll_diff = self.Z + sum_logits - curr_return.log() - sum_back_logits + curr_episode_len*torch.log(self.alpha/(1-self.alpha)) # Bias GFlowNets by alpha
+            curr_ll_diff = self.Z + sum_logits - curr_return.log() - sum_back_logits + curr_episode_len*torch.log(self.alpha/(1-self.alpha)) # alpha-GFN
             ll_diff.append(curr_ll_diff ** 2)
 
         ll_diff = torch.cat(ll_diff)
@@ -346,7 +346,7 @@ class DBFlowNetAgent:
         batch_s, batch_a = [[] for i in range(mbsize)], [[] for i in range(mbsize)] # online sampling of mbsize trajectories
         batch_ri = [[] for i in range(mbsize)] 
         env_idx_done_map = {i: False for i in range(mbsize)}
-        not_done_envs = [i for i in range(mbsize)] # envs不是有bufsize个吗
+        not_done_envs = [i for i in range(mbsize)]
         env_idx_return_map = {}
 
         s = tf([i.reset() for i in self.envs])
@@ -421,7 +421,6 @@ class DBFlowNetAgent:
 
         ll_diff = []
         for data_idx in range(len(states)):
-            # collect training information sample-by-sample
             curr_episode_len = episode_lens[data_idx]
 
             curr_states = states[data_idx][:curr_episode_len, :] 
@@ -440,23 +439,22 @@ class DBFlowNetAgent:
             logits = logits[:-1, :].gather(1, curr_actions).squeeze(1) 
             back_logits = back_logits[1:, :].gather(1, curr_actions).squeeze(1) 
 
-            log_flow = pred[..., -1] # 这种写法是为什么？
+            log_flow = pred[..., -1] 
             log_flow = log_flow[:-1] 
 
             curr_ll_diff = torch.zeros(curr_states.shape[0] - 1).to(self.dev)
             curr_ll_diff += log_flow
             curr_ll_diff += logits
-            curr_ll_diff[:-1] -= log_flow[1:] # 这里是DB用并行的方法实现
+            curr_ll_diff[:-1] -= log_flow[1:] 
             curr_ll_diff -= back_logits
-            curr_ll_diff[-1] -= curr_return.log() # only evaluate reward at the end of the trajectory
-            # Biased GFlowNets
-            curr_ll_diff+= torch.ones_like(log_flow,device=log_flow.device, requires_grad=False) * torch.log(self.alpha/(1-self.alpha)) # Bias GFlowNets by alpha
+            curr_ll_diff[-1] -= curr_return.log()
+            curr_ll_diff+= torch.ones_like(log_flow,device=log_flow.device, requires_grad=False) * torch.log(self.alpha/(1-self.alpha)) # alpha-GFN
 
             ll_diff.append(curr_ll_diff ** 2)
 
         ll_diff = torch.cat(ll_diff)
 
-        loss = ll_diff.sum() / len(ll_diff) # average DB over all the states and transitions
+        loss = ll_diff.sum() / len(ll_diff)
 
         return [loss]
 
@@ -492,8 +490,7 @@ class DBFlowNetAgent:
             curr_ll_diff -= back_logits
             curr_ll_diff -= log_flow[1:]
             curr_ll_diff -= curr_intermediate_rewards.log() # evaluate the reward at every intermediate states
-            # Biased GFlowNets
-            curr_ll_diff += torch.ones_like(log_flow[:-1],device=log_flow.device, requires_grad=False) * torch.log(self.alpha/(1-self.alpha)) # Bias GFlowNets by alpha
+            curr_ll_diff += torch.ones_like(log_flow[:-1],device=log_flow.device, requires_grad=False) * torch.log(self.alpha/(1-self.alpha)) # alpha-GFN
 
             ll_diff.append(curr_ll_diff ** 2)
 
@@ -503,7 +500,6 @@ class DBFlowNetAgent:
 
         return [loss]
     
-# TODO: write SubTB GFN
 
 def main(args):
     torch.manual_seed(args.seed)
@@ -518,7 +514,7 @@ def main(args):
         method_name = 'fl_' + args.method
 
     if args.wdb:
-        wandb.init(project='Length Biased GFlowNets, FL-GFN-codebase, Set Generation', name='method({})_size({})_mthres({})_alpha({})_seed({})'.format(method_name,args.size,args.mode_threshold,args.alpha,args.seed))
+        wandb.init(project='Alpha GFlowNets, FL-GFN-codebase, Set Generation', name='method({})_size({})_mthres({})_alpha({})_seed({})'.format(method_name,args.size,args.mode_threshold,args.alpha,args.seed))
         print("Successfully initialized wandb",flush=True)
 
     args.dev = torch.device(args.device)
@@ -553,7 +549,7 @@ def main(args):
             args.exp_weight = 0.
 
     # Prepare the environment
-    envs = [SetEnv(args.action_dim, args.set_size, intermediate_energies) for i in range(args.bufsize)] # 这个bufsize是干什么的，为什么需要bufsize个环境
+    envs = [SetEnv(args.action_dim, args.set_size, intermediate_energies) for i in range(args.bufsize)]
     print("Successfully initialized the environment",flush=True)
 
     if args.method == 'tb_gfn':
@@ -594,16 +590,13 @@ def main(args):
             
             print(f"round {i+1}, mean_R={mean_R}, mean_top_k_R={mean_top_k_R}, num_unique_Rs={len(all_unique_Rs)},modes under threshold({args.mode_threshold}={modes})",flush=True)
             if args.wdb:
-                # TODO: find mode settings
                 wandb.log({'mean_top_k_R': mean_top_k_R,
                            'mean_R': mean_R,
                            'modes': modes,})
 
 if __name__ == '__main__':
     print("start parsing args...",flush=True)
-    # TODO: print arg configuration
     args = parser.parse_args()
-    # 遍历并逐行打印每个参数
     for arg, value in vars(args).items():
         print(f"{arg}: {value}")
     torch.set_num_threads(args.num_threads)
