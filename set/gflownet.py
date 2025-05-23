@@ -56,7 +56,7 @@ parser.add_argument("--action_dim", default=10, type=int)
 parser.add_argument("--set_size", default=5, type=int)
 parser.add_argument("--bufsize", default=16, type=int)
 
-# Alpha GFlowNets
+# Alpha GFlowNets 
 parser.add_argument("--alpha", default=0.5,help="Convex Combination Bias", type=float)
 parser.add_argument("--mode_threshold", default=0.25,type=float) # manually set the reward threshold
 parser.add_argument("--num_threads",default=8,type=int)
