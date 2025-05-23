@@ -35,14 +35,13 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--device", default='cuda', type=str)
 parser.add_argument("--progress", action='store_true',default=True)
 parser.add_argument("--seed", default=0, type=int)
-# parser.add_argument("--wdb", action='store_true',default=True)
 parser.add_argument("--wdb", action='store_true',default=True)
 
 parser.add_argument("--method", default='db_gfn', type=str)
 parser.add_argument("--learning_rate", default=1e-4, help="Learning rate", type=float)
 parser.add_argument("--tb_lr", default=0.001, help="Learning rate", type=float)
 parser.add_argument("--tb_z_lr", default=0.1, help="Learning rate", type=float)
-parser.add_argument("--mbsize", default=16, help="Minibatch size", type=int) # batch size
+parser.add_argument("--mbsize", default=16, help="Minibatch size", type=int)
 parser.add_argument("--n_hid", default=256, type=int)
 parser.add_argument("--n_layers", default=2, type=int)
 parser.add_argument("--n_train_steps", default=10000, type=int)
@@ -58,7 +57,7 @@ parser.add_argument("--bufsize", default=16, type=int)
 
 # Alpha GFlowNets 
 parser.add_argument("--alpha", default=0.5,help="alpha-GFN forward policy weight", type=float)
-parser.add_argument("--mode_threshold", default=0.25,type=float) # manually set the reward threshold, 0.25 for small, 700000 for medium and large
+parser.add_argument("--mode_threshold", default=0.25,type=float) # manually set the reward threshold. 0.25 for small, 700000 for medium and large
 parser.add_argument("--num_threads",default=8,type=int)
 
 print("Initialized args, start initializing models",flush=True)
